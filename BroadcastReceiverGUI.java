@@ -81,30 +81,18 @@ public class BroadcastReceiverGUI extends JFrame {
         }
     }
 
-   private void taiFile() {
-    String daChon = danhSachTep.getSelectedValue();
-    if (daChon == null) {
-        thanhGhii("Hay chon mot file de tai.");
-        return;
-    }
-    ThongTinMayChu thongTin = thongTinFile.get(daChon);
-    
-    String user = JOptionPane.showInputDialog("Nhap tai khoan:");
-    
-    JPasswordField passwordField = new JPasswordField();
-    int option = JOptionPane.showConfirmDialog(this, passwordField, "Nhap mat khau", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-    char[] passwordChars = passwordField.getPassword();
-    String password = new String(passwordChars);
-
-    if (option == JOptionPane.OK_OPTION) {
+    private void taiFile() {
+        String daChon = danhSachTep.getSelectedValue();
+        if (daChon == null) {
+            thanhGhii("Hay chon mot file de tai.");
+            return;
+        }
+        ThongTinMayChu thongTin = thongTinFile.get(daChon);
         new Thread(() -> {
             try (Socket ketNoiTCP = new Socket(thongTin.diaChiIP, thongTin.cuaSo);
                  OutputStream os = ketNoiTCP.getOutputStream();
                  PrintWriter writer = new PrintWriter(os, true);
                  InputStream is = ketNoiTCP.getInputStream()) {
-
-                writer.println(user);
-                writer.println(password);
 
                 writer.println(thongTin.tenFile);
 
@@ -117,15 +105,7 @@ public class BroadcastReceiverGUI extends JFrame {
                         int soByteDoc;
                         while ((soByteDoc = is.read(buffer)) != -1)
                             fos.write(buffer, 0, soByteDoc);
-                    }
-                    long kichThuocNhanDuoc = fileLuu.length();
-
-                    if (kichThuocNhanDuoc == thongTin.kichThuoc) {
                         thanhGhii("Tai thanh cong: " + fileLuu.getAbsolutePath());
-                    } else {
-                        thanhGhii("Loi: Kich thuoc file tai ve khong dung!");
-                        thanhGhii("Kich thuoc mong doi: " + thongTin.kichThuoc + " byte");
-                        thanhGhii("Kich thuoc nhan duoc: " + kichThuocNhanDuoc + " byte");
                     }
                 } else {
                     thanhGhii("Da huy luu file.");
@@ -135,11 +115,7 @@ public class BroadcastReceiverGUI extends JFrame {
                 thanhGhii("Loi khi tai file: " + e.getMessage());
             }
         }).start();
-    } else {
-        thanhGhii("Da huy nhap mat khau.");
     }
-}
-
 
     private void thanhGhii(String thongDiep) {
         SwingUtilities.invokeLater(() -> {
