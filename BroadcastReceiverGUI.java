@@ -94,6 +94,9 @@ public class BroadcastReceiverGUI extends JFrame {
              PrintWriter writer = new PrintWriter(os, true);
              InputStream is = ketNoiTCP.getInputStream()) {
 
+            writer.println("ducmanh");
+            writer.println("ducmanh123");
+
             writer.println(thongTin.tenFile);
 
             JFileChooser hopChon = new JFileChooser();
