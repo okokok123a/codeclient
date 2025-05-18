@@ -20,8 +20,8 @@ public class BroadcastReceiverGUI extends JFrame {
         setLayout(new BorderLayout());
 
         thanhGhi = new JTextArea();
-        nutLangNghe = new JButton("Bat dau lang nghe Broadcast");
-        nutTaiTep = new JButton("Tai file da chon");
+        nutLangNghe = new JButton("Bắt đầu lắng nghe Broadcast");
+        nutTaiTep = new JButton("Tải file");
         danhSach = new DefaultListModel<>();
         danhSachTep = new JList<>(danhSach);
         thongTinFile = new HashMap<>();
@@ -48,7 +48,7 @@ public class BroadcastReceiverGUI extends JFrame {
 
     private void batDauLangNghe() {
         if (danhSachTep.getModel().getSize() > 0) {
-            thanhGhii("Da bat lang nghe roi!");
+            thanhGhii("Đã bắt đầu lắng nghe!");
             return;
         }
         new Thread(() -> {
@@ -61,23 +61,23 @@ public class BroadcastReceiverGUI extends JFrame {
                     xuLyThongDiep(new String(goiTin.getData(), 0, goiTin.getLength()));
                 }
             } catch (IOException e) {
-                thanhGhii("Loi khi lang nghe: " + e.getMessage());
+                thanhGhii("Lỗi khi lắng nghe broadcast: " + e.getMessage());
             }
         }).start();
-        thanhGhii("Dang lang nghe broadcast...");
+        thanhGhii("Đang lắng nghe broadcast...");
     }
 
     private void xuLyThongDiep(String thongDiep) {
         String[] phan = thongDiep.split(";");
         if (phan.length == 4) {
-            String hienThi = phan[0] + " - " + phan[1] + " bytes from " + phan[2] + ":" + phan[3];
+            String hienThi = phan[0] + " dung lượng " + phan[1] + " bytes từ địa chỉ IP " + phan[2] + " và cổng TCP " + phan[3];
             ThongTinMayChu thongTin = new ThongTinMayChu(phan[0], Long.parseLong(phan[1]), phan[2],
                     Integer.parseInt(phan[3]));
             if (!thongTinFile.containsKey(hienThi)) {
                 thongTinFile.put(hienThi, thongTin);
                 SwingUtilities.invokeLater(() -> {
                     danhSach.addElement(hienThi);
-                    thanhGhii("Phat hien file: " + hienThi);
+                    thanhGhii("Phát hiện file: " + hienThi);
                 });
             }
         }
@@ -86,7 +86,7 @@ public class BroadcastReceiverGUI extends JFrame {
     private void taiFile() {
         String daChon = danhSachTep.getSelectedValue();
         if (daChon == null) {
-            thanhGhii("Hay chon mot file de tai.");
+            thanhGhii("Hãy chọn một file để tải.");
             return;
         }
 
@@ -141,10 +141,10 @@ public class BroadcastReceiverGUI extends JFrame {
 
                     if (fileLuu.exists()) {
                         int overwrite = JOptionPane.showConfirmDialog(this,
-                                "File da ton tai. Ban co muon ghi de khong?",
-                                "Canh bao", JOptionPane.YES_NO_OPTION);
+                                "File đã tồn tại bạn muốn tải lại không",
+                                "Cảnh báo", JOptionPane.YES_NO_OPTION);
                         if (overwrite != JOptionPane.YES_OPTION) {
-                            thanhGhii("Huy tai vi file da ton tai.");
+                            thanhGhii("Hủy tải vì file đã tồn tại.");
                             return;
                         }
                     }
@@ -154,10 +154,10 @@ public class BroadcastReceiverGUI extends JFrame {
                         int soByteDoc;
                         while ((soByteDoc = is.read(buffer)) != -1)
                             fos.write(buffer, 0, soByteDoc);
-                        thanhGhii("Tai thanh cong: " + fileLuu.getAbsolutePath());
+                        thanhGhii("Tải thành công: " + fileLuu.getAbsolutePath());
                     }
                 } else {
-                    thanhGhii("Da huy luu file.");
+                    thanhGhii("Đã hủy lưu file.");
                 }
 
             } catch (IOException e) {
