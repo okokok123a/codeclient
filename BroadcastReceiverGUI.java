@@ -82,40 +82,48 @@ public class BroadcastReceiverGUI extends JFrame {
     }
 
     private void taiFile() {
-        String daChon = danhSachTep.getSelectedValue();
-        if (daChon == null) {
-            thanhGhii("Hay chon mot file de tai.");
-            return;
-        }
-        ThongTinMayChu thongTin = thongTinFile.get(daChon);
-        new Thread(() -> {
-            try (Socket ketNoiTCP = new Socket(thongTin.diaChiIP, thongTin.cuaSo);
-                 OutputStream os = ketNoiTCP.getOutputStream();
-                 PrintWriter writer = new PrintWriter(os, true);
-                 InputStream is = ketNoiTCP.getInputStream()) {
-
-                writer.println(thongTin.tenFile);
-
-                JFileChooser hopChon = new JFileChooser();
-                hopChon.setSelectedFile(new File(thongTin.tenFile));
-                if (hopChon.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-                    File fileLuu = hopChon.getSelectedFile();
-                    try (FileOutputStream fos = new FileOutputStream(fileLuu)) {
-                        byte[] buffer = new byte[4096];
-                        int soByteDoc;
-                        while ((soByteDoc = is.read(buffer)) != -1)
-                            fos.write(buffer, 0, soByteDoc);
-                        thanhGhii("Tai thanh cong: " + fileLuu.getAbsolutePath());
-                    }
-                } else {
-                    thanhGhii("Da huy luu file.");
-                }
-
-            } catch (IOException e) {
-                thanhGhii("Loi khi tai file: " + e.getMessage());
-            }
-        }).start();
+    String daChon = danhSachTep.getSelectedValue();
+    if (daChon == null) {
+        thanhGhii("Hay chon mot file de tai.");
+        return;
     }
+    ThongTinMayChu thongTin = thongTinFile.get(daChon);
+    new Thread(() -> {
+        try (Socket ketNoiTCP = new Socket(thongTin.diaChiIP, thongTin.cuaSo);
+             OutputStream os = ketNoiTCP.getOutputStream();
+             PrintWriter writer = new PrintWriter(os, true);
+             InputStream is = ketNoiTCP.getInputStream()) {
+
+            writer.println(thongTin.tenFile);
+
+            JFileChooser hopChon = new JFileChooser();
+            hopChon.setSelectedFile(new File(thongTin.tenFile));
+            if (hopChon.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                File fileLuu = hopChon.getSelectedFile();
+                try (FileOutputStream fos = new FileOutputStream(fileLuu)) {
+                    byte[] buffer = new byte[4096];
+                    int soByteDoc;
+                    while ((soByteDoc = is.read(buffer)) != -1)
+                        fos.write(buffer, 0, soByteDoc);
+                }
+                long kichThuocNhanDuoc = fileLuu.length();
+
+                if (kichThuocNhanDuoc == thongTin.kichThuoc) {
+                    thanhGhii("Tai thanh cong: " + fileLuu.getAbsolutePath());
+                } else {
+                    thanhGhii("Loi: Kich thuoc file tai ve khong dung!");
+                    thanhGhii("Kich thuoc mong doi: " + thongTin.kichThuoc + " byte");
+                    thanhGhii("Kich thuoc nhan duoc: " + kichThuocNhanDuoc + " byte");
+                }
+            } else {
+                thanhGhii("Da huy luu file.");
+            }
+
+        } catch (IOException e) {
+            thanhGhii("Loi khi tai file: " + e.getMessage());
+        }
+    }).start();
+}
 
     private void thanhGhii(String thongDiep) {
         SwingUtilities.invokeLater(() -> {
