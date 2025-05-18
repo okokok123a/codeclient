@@ -88,14 +88,17 @@ public class BroadcastReceiverGUI extends JFrame {
         return;
     }
     ThongTinMayChu thongTin = thongTinFile.get(daChon);
+    String user = JOptionPane.showInputDialog("Nhap tai khoan:");
+    String password = new String(JPasswordField.createPasswordField().getPassword());
+
     new Thread(() -> {
         try (Socket ketNoiTCP = new Socket(thongTin.diaChiIP, thongTin.cuaSo);
              OutputStream os = ketNoiTCP.getOutputStream();
              PrintWriter writer = new PrintWriter(os, true);
              InputStream is = ketNoiTCP.getInputStream()) {
 
-            writer.println("ducmanh");
-            writer.println("ducmanh123");
+            writer.println(user);
+            writer.println(password);
 
             writer.println(thongTin.tenFile);
 
@@ -127,6 +130,7 @@ public class BroadcastReceiverGUI extends JFrame {
         }
     }).start();
 }
+
 
     private void thanhGhii(String thongDiep) {
         SwingUtilities.invokeLater(() -> {
