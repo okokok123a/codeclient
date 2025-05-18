@@ -10,6 +10,7 @@ public class BroadcastReceiverGUI extends JFrame {
     DefaultListModel<String> danhSach;
     JList<String> danhSachTep;
     Map<String, ThongTinMayChu> thongTinFile;
+    Map<String, String[]> danhSachTaiKhoan = new HashMap<>();
 
     public BroadcastReceiverGUI() {
         setTitle("Client");
@@ -87,13 +88,49 @@ public class BroadcastReceiverGUI extends JFrame {
             thanhGhii("Hay chon mot file de tai.");
             return;
         }
+
         ThongTinMayChu thongTin = thongTinFile.get(daChon);
+        String key = thongTin.diaChiIP + ":" + thongTin.cuaSo;
+        String username, password;
+
+        if (danhSachTaiKhoan.containsKey(key)) {
+            String[] info = danhSachTaiKhoan.get(key);
+            username = info[0];
+            password = info[1];
+        } else {
+            JPanel panel = new JPanel(new GridLayout(2, 2));
+            JTextField userField = new JTextField();
+            JPasswordField passField = new JPasswordField();
+            panel.add(new JLabel("Username:"));
+            panel.add(userField);
+            panel.add(new JLabel("Password:"));
+            panel.add(passField);
+            int result = JOptionPane.showConfirmDialog(this, panel, "Đăng nhập", JOptionPane.OK_CANCEL_OPTION);
+            if (result != JOptionPane.OK_OPTION) {
+                thanhGhii("Đã huỷ đăng nhập.");
+                return;
+            }
+            username = userField.getText();
+            password = new String(passField.getPassword());
+        }
+
         new Thread(() -> {
             try (Socket ketNoiTCP = new Socket(thongTin.diaChiIP, thongTin.cuaSo);
                  OutputStream os = ketNoiTCP.getOutputStream();
                  PrintWriter writer = new PrintWriter(os, true);
-                 InputStream is = ketNoiTCP.getInputStream()) {
+                 InputStream is = ketNoiTCP.getInputStream();
+                 BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
+                writer.println(username);
+                writer.println(password);
+                String phanHoi = reader.readLine();
+                if ("AUTH_FAIL".equals(phanHoi)) {
+                    thanhGhii("Sai username hoac password.");
+                    danhSachTaiKhoan.remove(key);
+                    return;
+                }
+
+                danhSachTaiKhoan.put(key, new String[]{username, password});
                 writer.println(thongTin.tenFile);
 
                 JFileChooser hopChon = new JFileChooser();
