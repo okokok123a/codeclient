@@ -71,7 +71,8 @@ public class BroadcastReceiverGUI extends JFrame {
         String[] phan = thongDiep.split(";");
         if (phan.length == 4) {
             String hienThi = phan[0] + " - " + phan[1] + " bytes from " + phan[2] + ":" + phan[3];
-            ThongTinMayChu thongTin = new ThongTinMayChu(phan[0], Long.parseLong(phan[1]), phan[2], Integer.parseInt(phan[3]));
+            ThongTinMayChu thongTin = new ThongTinMayChu(phan[0], Long.parseLong(phan[1]), phan[2],
+                    Integer.parseInt(phan[3]));
             if (!thongTinFile.containsKey(hienThi)) {
                 thongTinFile.put(hienThi, thongTin);
                 SwingUtilities.invokeLater(() -> {
@@ -116,10 +117,10 @@ public class BroadcastReceiverGUI extends JFrame {
 
         new Thread(() -> {
             try (Socket ketNoiTCP = new Socket(thongTin.diaChiIP, thongTin.cuaSo);
-                 OutputStream os = ketNoiTCP.getOutputStream();
-                 PrintWriter writer = new PrintWriter(os, true);
-                 InputStream is = ketNoiTCP.getInputStream();
-                 BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                    OutputStream os = ketNoiTCP.getOutputStream();
+                    PrintWriter writer = new PrintWriter(os, true);
+                    InputStream is = ketNoiTCP.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
                 writer.println(username);
                 writer.println(password);
@@ -130,13 +131,24 @@ public class BroadcastReceiverGUI extends JFrame {
                     return;
                 }
 
-                danhSachTaiKhoan.put(key, new String[]{username, password});
+                danhSachTaiKhoan.put(key, new String[] { username, password });
                 writer.println(thongTin.tenFile);
 
                 JFileChooser hopChon = new JFileChooser();
                 hopChon.setSelectedFile(new File(thongTin.tenFile));
                 if (hopChon.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                     File fileLuu = hopChon.getSelectedFile();
+
+                    if (fileLuu.exists()) {
+                        int overwrite = JOptionPane.showConfirmDialog(this,
+                                "File da ton tai. Ban co muon ghi de khong?",
+                                "Canh bao", JOptionPane.YES_NO_OPTION);
+                        if (overwrite != JOptionPane.YES_OPTION) {
+                            thanhGhii("Huy tai vi file da ton tai.");
+                            return;
+                        }
+                    }
+
                     try (FileOutputStream fos = new FileOutputStream(fileLuu)) {
                         byte[] buffer = new byte[4096];
                         int soByteDoc;
